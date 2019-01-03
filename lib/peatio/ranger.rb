@@ -14,7 +14,7 @@ module Peatio::Ranger
 
     def handle(msg)
       data = JSON.parse(msg)
-      @client.user = data[:uid]
+      @client.user = data["uid"]
       @client.authorized = true
 
       @logger.info "ranger: user #{@client.user} authenticated #{@streams}"
