@@ -1,7 +1,6 @@
 module Peatio::Ranger
   class Connection
-    def initialize(authenticator, socket, logger)
-      @authenticator = authenticator
+    def initialize(socket, logger)
       @socket = socket
       @logger = logger
       @streams = []
@@ -14,26 +13,8 @@ module Peatio::Ranger
     end
 
     def handle(msg)
-      authorized = false
-      begin
-        data = JSON.parse(msg)
-
-        token = data["jwt"]
-
-        payload = @authenticator.authenticate!(token)
-
-        authorized = true
-      rescue JSON::ParserError
-      rescue => error
-        @logger.error error.message
-      end
-
-      if !authorized
-        send :error, message: "Authentication failed."
-        return
-      end
-
-      @client.user = payload[:uid]
+      data = JSON.parse(msg)
+      @client.user = data[:uid]
       @client.authorized = true
 
       @logger.info "ranger: user #{@client.user} authenticated #{@streams}"
@@ -60,11 +41,9 @@ module Peatio::Ranger
     end
   end
 
-  def self.run!(jwt_public_key)
+  def self.run!
     host = ENV["RANGER_HOST"] || "0.0.0.0"
     port = ENV["RANGER_PORT"] || "8081"
-
-    authenticator = Peatio::Auth::JWTAuthenticator.new(jwt_public_key)
 
     logger = Peatio::Logger.logger
     logger.info "Starting the server on port #{port}"
@@ -81,7 +60,7 @@ module Peatio::Ranger
         port: port,
         secure: false,
       ) do |socket|
-        connection = Connection.new(authenticator, socket, logger)
+        connection = Connection.new(socket, logger)
 
         socket.onopen do |handshake|
           connection.handshake(handshake)
