@@ -11,18 +11,6 @@ module Peatio::Ranger
       @socket.send payload
     end
 
-    def authenticate(jwt)
-      payload = {}
-      authorized = false
-      begin
-        payload = @authenticator.authenticate!(jwt)
-        authorized = true
-      rescue Peatio::Auth::Error => error
-        @logger.error error.message
-      end
-      return [authorized, payload]
-    end
-
     def update_streams
       @socket.instance_variable_set(:@connection_handler, @client)
     end
@@ -68,19 +56,8 @@ module Peatio::Ranger
       subscribe(query.map {|item| item.last if item.first == "stream"})
       @logger.info "ranger: WebSocket connection openned"
 
-      if hs.headers_downcased.key?("authorization")
-        authorized, payload = authenticate(hs.headers["authorization"])
-
-        if !authorized
-          @logger.info "ranger: #{@client.user} authentication failed"
-          raise EM::WebSocket::HandshakeError, "Authorization failed"
-        else
-          @logger.info [authorized, payload].inspect
-          @client.user = payload[:uid]
-          @client.authorized = true
-          @logger.info "ranger: user #{@client.user} authenticated #{@client.streams}"
-        end
-      end
+      @client.authorized = true
+      @logger.info "ranger: user #{@client.user} authenticated #{@client.streams}"
     end
   end
 
