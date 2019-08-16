@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "activemodel", "~> 5.2.3"
   spec.add_dependency "clamp"
   spec.add_dependency "amqp"
   spec.add_dependency "eventmachine"
@@ -41,4 +42,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "simplecov-json"
   spec.add_development_dependency "rspec_junit_formatter"
   spec.add_development_dependency "rubocop-github"
+  spec.add_development_dependency "pry-byebug"
 end
