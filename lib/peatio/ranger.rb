@@ -36,6 +36,8 @@ module Peatio::Ranger
     def handle(msg)
       begin
         data = JSON.parse(msg)
+        @logger.info msg
+        byebug
         @client.user = data[:uid]
         @logger.info "ranger: user #{@client.user} authenticated #{@client.streams}"
 
@@ -55,6 +57,7 @@ module Peatio::Ranger
       @client = Peatio::MQ::Events::Client.new(@socket)
 
       query = URI::decode_www_form(hs.query_string)
+      byebug
       subscribe(query.map {|item| item.last if item.first == "stream"})
       @logger.info "ranger: WebSocket connection openned"
 
