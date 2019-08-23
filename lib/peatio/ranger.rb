@@ -36,6 +36,8 @@ module Peatio::Ranger
     def handle(msg)
       begin
         data = JSON.parse(msg)
+        @client.user = data[:uid]
+        @logger.info "ranger: user #{@client.user} authenticated #{@client.streams}"
 
         case data["event"]
         when "subscribe"
